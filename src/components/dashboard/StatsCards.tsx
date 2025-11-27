@@ -28,39 +28,30 @@ export function StatsCards({ checkIns, daysSinceLastCheckIn }: Props) {
     ? Math.round((scriptureCount / checkIns.length) * 100)
     : 0
 
+  const stats = [
+    { value: checkIns.length, label: 'Total Check-Ins', color: 'text-indigo-600 dark:text-indigo-400', emoji: '' },
+    { value: `${streak} 🔥`, label: 'Clean Streak', color: 'text-green-600 dark:text-green-400', emoji: '' },
+    { value: daysSinceLastCheckIn ?? '—', label: 'Days Since', color: daysSinceLastCheckIn && daysSinceLastCheckIn >= 3 ? 'text-red-500' : 'text-amber-600 dark:text-amber-400', emoji: '' },
+    { value: avgEmotional, label: 'Avg Emotional', color: 'text-purple-600 dark:text-purple-400', emoji: '' },
+    { value: avgSpiritual, label: 'Avg Spiritual', color: 'text-emerald-600 dark:text-emerald-400', emoji: '' },
+    { value: `${scripturePercent}%`, label: 'Scripture', color: 'text-blue-600 dark:text-blue-400', emoji: '' },
+  ]
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{checkIns.length}</div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Total Check-Ins</div>
-      </div>
-      
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{streak} 🔥</div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Clean Streak</div>
-      </div>
-      
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div className={`text-2xl font-bold ${daysSinceLastCheckIn && daysSinceLastCheckIn >= 3 ? 'text-red-500' : 'text-amber-600 dark:text-amber-400'}`}>
-          {daysSinceLastCheckIn ?? '—'}
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+      {stats.map((stat, index) => (
+        <div 
+          key={index}
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <div className={`text-xl sm:text-2xl font-bold ${stat.color} truncate`}>
+            {stat.value}
+          </div>
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
+            {stat.label}
+          </div>
         </div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Days Since Check-In</div>
-      </div>
-      
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{avgEmotional}</div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Avg Emotional</div>
-      </div>
-      
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{avgSpiritual}</div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Avg Spiritual</div>
-      </div>
-      
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{scripturePercent}%</div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Scripture Reading</div>
-      </div>
+      ))}
     </div>
   )
 }

@@ -25,24 +25,40 @@ export function TrendChart({ checkIns }: Props) {
   const textColor = isDark ? '#f9fafb' : '#1f2937'
 
   return (
-    <div style={{ width: '100%', height: 300, position: 'relative', overflow: 'hidden' }}>
+    <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] relative overflow-hidden">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-          <XAxis dataKey="date" stroke={axisColor} tick={{ fill: axisColor }} />
-          <YAxis domain={[1, 10]} stroke={axisColor} tick={{ fill: axisColor }} />
+        <LineChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
+          <XAxis 
+            dataKey="date" 
+            stroke={axisColor} 
+            tick={{ fill: axisColor, fontSize: 11 }}
+            tickMargin={8}
+            interval="preserveStartEnd"
+          />
+          <YAxis 
+            domain={[1, 10]} 
+            stroke={axisColor} 
+            tick={{ fill: axisColor, fontSize: 11 }}
+            width={35}
+          />
           <Tooltip
             contentStyle={{
               backgroundColor: tooltipBg,
               border: `1px solid ${tooltipBorder}`,
               borderRadius: '8px',
               color: textColor,
+              fontSize: '12px',
+              padding: '8px 12px',
             }}
-            labelStyle={{ color: textColor }}
+            labelStyle={{ color: textColor, fontWeight: 600, marginBottom: '4px' }}
           />
-          <Legend wrapperStyle={{ color: textColor }} />
-          <Line type="monotone" dataKey="Emotional" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6' }} />
-          <Line type="monotone" dataKey="Spiritual" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981' }} />
-          <Line type="monotone" dataKey="Stress" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b' }} />
+          <Legend 
+            wrapperStyle={{ color: textColor, fontSize: '12px', paddingTop: '8px' }}
+            iconSize={10}
+          />
+          <Line type="monotone" dataKey="Emotional" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 3 }} activeDot={{ r: 5 }} />
+          <Line type="monotone" dataKey="Spiritual" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981', r: 3 }} activeDot={{ r: 5 }} />
+          <Line type="monotone" dataKey="Stress" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 3 }} activeDot={{ r: 5 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>
