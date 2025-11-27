@@ -12,8 +12,8 @@ export function CheckInDetailPage() {
   if (!checkIn) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Check-in not found.</p>
-        <Link to="/history" className="text-indigo-600 hover:underline">
+        <p className="text-gray-500 dark:text-gray-400">Check-in not found.</p>
+        <Link to="/history" className="text-indigo-600 dark:text-indigo-400 hover:underline">
           Back to history
         </Link>
       </div>
@@ -21,16 +21,16 @@ export function CheckInDetailPage() {
   }
 
   const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">{title}</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{title}</h2>
       {children}
     </div>
   )
 
   const Field = ({ label, value }: { label: string; value: React.ReactNode }) => (
-    <div className="py-2 border-b border-gray-100 last:border-0">
-      <div className="text-sm text-gray-500">{label}</div>
-      <div className="text-gray-800">{value || '—'}</div>
+    <div className="py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+      <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
+      <div className="text-gray-800 dark:text-gray-100">{value || '—'}</div>
     </div>
   )
 
@@ -38,10 +38,10 @@ export function CheckInDetailPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/history" className="text-indigo-600 hover:underline text-sm">
+          <Link to="/history" className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
             ← Back to history
           </Link>
-          <h1 className="text-2xl font-bold text-gray-800 mt-2">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2">
             {new Date(checkIn.check_in_date).toLocaleDateString('en-US', {
               weekday: 'long',
               year: 'numeric',
@@ -51,11 +51,11 @@ export function CheckInDetailPage() {
           </h1>
         </div>
         {checkIn.acted_on_urges ? (
-          <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full">
+          <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full">
             Struggled
           </span>
         ) : (
-          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full">
+          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">
             Victory ✓
           </span>
         )}
@@ -63,17 +63,17 @@ export function CheckInDetailPage() {
 
       <Section title="💜 Heart Check">
         <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="text-center p-3 bg-purple-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">{checkIn.rating_emotional}</div>
-            <div className="text-sm text-gray-600">Emotional</div>
+          <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{checkIn.rating_emotional}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Emotional</div>
           </div>
-          <div className="text-center p-3 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{checkIn.rating_spiritual}</div>
-            <div className="text-sm text-gray-600">Spiritual</div>
+          <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{checkIn.rating_spiritual}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Spiritual</div>
           </div>
-          <div className="text-center p-3 bg-amber-50 rounded-lg">
-            <div className="text-2xl font-bold text-amber-600">{checkIn.rating_stress}</div>
-            <div className="text-sm text-gray-600">Stress</div>
+          <div className="text-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{checkIn.rating_stress}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Stress</div>
           </div>
         </div>
         <Field label="What's been weighing on you?" value={checkIn.weighing_on_mind} />
@@ -85,8 +85,8 @@ export function CheckInDetailPage() {
       <Section title="⚔️ The Battle">
         <Field label="Urge level" value={
           <span className={`capitalize ${
-            checkIn.urge_level === 'strong' ? 'text-red-600' : 
-            checkIn.urge_level === 'some' ? 'text-amber-600' : 'text-green-600'
+            checkIn.urge_level === 'strong' ? 'text-red-600 dark:text-red-400' : 
+            checkIn.urge_level === 'some' ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'
           }`}>
             {checkIn.urge_level}
           </span>
@@ -110,10 +110,10 @@ export function CheckInDetailPage() {
         <Field label="Stress points" value={checkIn.stress_points} />
         <Field label="HALT factors" value={
           <div className="flex gap-2 flex-wrap">
-            {checkIn.halt_hungry && <span className="px-2 py-1 bg-gray-100 rounded">🍽️ Hungry</span>}
-            {checkIn.halt_angry && <span className="px-2 py-1 bg-gray-100 rounded">😤 Angry/Anxious</span>}
-            {checkIn.halt_lonely && <span className="px-2 py-1 bg-gray-100 rounded">😔 Lonely</span>}
-            {checkIn.halt_tired && <span className="px-2 py-1 bg-gray-100 rounded">😴 Tired</span>}
+            {checkIn.halt_hungry && <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">🍽️ Hungry</span>}
+            {checkIn.halt_angry && <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">😤 Angry/Anxious</span>}
+            {checkIn.halt_lonely && <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">😔 Lonely</span>}
+            {checkIn.halt_tired && <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">😴 Tired</span>}
             {!checkIn.halt_hungry && !checkIn.halt_angry && !checkIn.halt_lonely && !checkIn.halt_tired && 'None'}
           </div>
         } />

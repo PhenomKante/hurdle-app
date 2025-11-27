@@ -2,20 +2,33 @@ import { Link } from 'react-router-dom'
 import { usePartnership } from '../../hooks/usePartnership'
 import { useCheckIns } from '../../hooks/useCheckIns'
 import { TrendChart } from './TrendChart'
+import { StatsCards } from './StatsCards'
+import { BattleStatus } from './BattleStatus'
+import { HALTChart } from './HALTChart'
+import { TriggerPatterns } from './TriggerPatterns'
+import { WinsHighlight } from './WinsHighlight'
+import { WeeklyComparison } from './WeeklyComparison'
+import { RecentCheckIns } from './RecentCheckIns'
+import { UpcomingChallenges } from './UpcomingChallenges'
 
 export function Dashboard() {
   const { partnership, loading: partnershipLoading } = usePartnership()
   const { checkIns, loading: checkInsLoading } = useCheckIns(partnership?.id)
 
   if (partnershipLoading || checkInsLoading) {
-    return <div className="text-center py-12 text-gray-500">Loading...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      </div>
+    )
   }
 
   if (!partnership) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Welcome to Hurdle</h2>
-        <p className="text-gray-600 mb-6">You need to set up a partnership to get started.</p>
+        <div className="text-6xl mb-4">🤝</div>
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Welcome to Hurdle</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">You need to set up a partnership to get started.</p>
         <Link
           to="/settings"
           className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
@@ -33,98 +46,86 @@ export function Dashboard() {
 
   const checkInsDue = daysSinceLastCheckIn === null || daysSinceLastCheckIn >= 3
 
-  // Calculate streak (consecutive check-ins without acting on urges)
-  let streak = 0
-  for (const checkIn of checkIns) {
-    if (checkIn.acted_on_urges) break
-    streak++
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">
             Partnership with {partnership.friend?.full_name || partnership.partner?.full_name}
           </p>
         </div>
-        {checkInsDue && (
-          <Link
-            to="/check-in"
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 animate-pulse"
-          >
-            New Check-In Due!
-          </Link>
-        )}
+        <div className="flex gap-3">
+          {checkInsDue && (
+            <Link
+              to="/check-in"
+              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 animate-pulse flex items-center gap-2"
+            >
+              <span>📝</span> New Check-In Due!
+            </Link>
+          )}
+          {!checkInsDue && (
+            <Link
+              to="/check-in"
+              className="px-4 py-2 border border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+            >
+              New Check-In
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="text-3xl font-bold text-indigo-600">{checkIns.length}</div>
-          <div className="text-gray-600">Total Check-Ins</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="text-3xl font-bold text-green-600">{streak}</div>
-          <div className="text-gray-600">Current Streak 🔥</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="text-3xl font-bold text-amber-600">
-            {daysSinceLastCheckIn ?? '—'}
-          </div>
-          <div className="text-gray-600">Days Since Last Check-In</div>
-        </div>
-      </div>
+      <StatsCards checkIns={checkIns} daysSinceLastCheckIn={daysSinceLastCheckIn} />
 
-      {/* Trend Chart */}
-      {checkIns.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Trends Over Time</h2>
-          <TrendChart checkIns={checkIns} />
+      {/* Main Content Grid */}
+      {checkIns.length > 0 ? (
+        <>
+          {/* Row 1: Trends & Weekly Comparison */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 overflow-hidden">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">📈 Trends Over Time</h2>
+              <div className="overflow-hidden">
+                <TrendChart checkIns={checkIns} />
+              </div>
+            </div>
+            <WeeklyComparison checkIns={checkIns} />
+          </div>
+
+          {/* Row 2: Battle Status & HALT */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BattleStatus checkIns={checkIns} />
+            <HALTChart checkIns={checkIns} />
+          </div>
+
+          {/* Row 3: Trigger Patterns */}
+          <TriggerPatterns checkIns={checkIns} />
+
+          {/* Row 4: Wins & Looking Ahead */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <WinsHighlight checkIns={checkIns} />
+            <UpcomingChallenges checkIns={checkIns} />
+          </div>
+
+          {/* Row 5: Recent Check-Ins */}
+          <RecentCheckIns checkIns={checkIns} />
+        </>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
+          <div className="text-6xl mb-4">📝</div>
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">No check-ins yet</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Start your first check-in to see your dashboard come to life with insights and trends.
+          </p>
+          <Link
+            to="/check-in"
+            className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Start First Check-In
+          </Link>
         </div>
       )}
-
-      {/* Recent Check-Ins */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Check-Ins</h2>
-        {checkIns.length === 0 ? (
-          <p className="text-gray-500">No check-ins yet. Start your first one!</p>
-        ) : (
-          <div className="space-y-3">
-            {checkIns.slice(0, 5).map(checkIn => (
-              <Link
-                key={checkIn.id}
-                to={`/check-in/${checkIn.id}`}
-                className="block p-4 border rounded-lg hover:bg-gray-50 transition"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-medium text-gray-800">
-                      {new Date(checkIn.check_in_date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Emotional: {checkIn.rating_emotional} | Spiritual: {checkIn.rating_spiritual} | Stress: {checkIn.rating_stress}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {checkIn.acted_on_urges ? (
-                      <span className="text-orange-500">⚠️</span>
-                    ) : (
-                      <span className="text-green-500">✓</span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   )
 }

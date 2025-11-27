@@ -57,7 +57,7 @@ export function CheckInForm() {
   if (!partnership) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">You need to set up a partnership first.</p>
+        <p className="text-gray-600 dark:text-gray-400">You need to set up a partnership first.</p>
       </div>
     )
   }
@@ -71,13 +71,13 @@ export function CheckInForm() {
             <button
               key={s}
               onClick={() => setStep(i)}
-              className={`text-xs sm:text-sm ${i === step ? 'text-indigo-600 font-medium' : 'text-gray-400'}`}
+              className={`text-xs sm:text-sm ${i === step ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-400 dark:text-gray-500'}`}
             >
               {s}
             </button>
           ))}
         </div>
-        <div className="h-2 bg-gray-200 rounded-full">
+        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
           <div 
             className="h-2 bg-indigo-600 rounded-full transition-all"
             style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
@@ -86,7 +86,7 @@ export function CheckInForm() {
       </div>
 
       {/* Form sections */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         {step === 0 && <HeartCheck data={formData} onChange={updateForm} />}
         {step === 1 && <BattleSection data={formData} onChange={updateForm} />}
         {step === 2 && <TriggersSection data={formData} onChange={updateForm} />}
@@ -99,7 +99,7 @@ export function CheckInForm() {
         <button
           onClick={() => setStep(s => s - 1)}
           disabled={step === 0}
-          className="px-6 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-30"
+          className="px-6 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30"
         >
           ← Back
         </button>
