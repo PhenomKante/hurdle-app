@@ -1,16 +1,22 @@
 /**
- * Check if a date falls within the current week (Monday to Sunday)
+ * Get Monday of current week at 00:00:00
  */
-export function isWithinCurrentWeek(dateString: string): boolean {
-  const checkInDate = new Date(dateString)
+export function getCurrentWeekMonday(): Date {
   const today = new Date()
-
-  // Get Monday of current week
   const monday = new Date(today)
   const dayOfWeek = today.getDay()
   const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
   monday.setDate(today.getDate() - daysFromMonday)
   monday.setHours(0, 0, 0, 0)
+  return monday
+}
+
+/**
+ * Check if a date falls within the current week (Monday to Sunday)
+ */
+export function isWithinCurrentWeek(dateString: string): boolean {
+  const checkInDate = new Date(dateString)
+  const monday = getCurrentWeekMonday()
 
   // Get Sunday of current week
   const sunday = new Date(monday)

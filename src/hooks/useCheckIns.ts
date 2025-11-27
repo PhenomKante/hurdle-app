@@ -1,10 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { isWithinCurrentWeek } from '../lib/dateUtils'
 import type { CheckIn, CheckInInsert } from '../types/database'
 
 export function useCheckIns(partnershipId: string | undefined) {
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Find check-in from current week (if any)
+  const currentWeekCheckIn = useMemo(() => {
+    return checkIns.find(c => isWithinCurrentWeek(c.check_in_date)) || null
+  }, [checkIns])
 
   useEffect(() => {
     if (partnershipId) {
@@ -71,5 +77,5 @@ export function useCheckIns(partnershipId: string | undefined) {
     return { error }
   }
 
-  return { checkIns, loading, createCheckIn, updateCheckIn, deleteCheckIn, refetch: fetchCheckIns }
+  return { checkIns, loading, currentWeekCheckIn, createCheckIn, updateCheckIn, deleteCheckIn, refetch: fetchCheckIns }
 }

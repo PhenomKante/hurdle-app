@@ -1,6 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useDarkMode } from '../../hooks/useDarkMode'
+import { usePartnership } from '../../hooks/usePartnership'
+import { useCheckIns } from '../../hooks/useCheckIns'
 
 interface Props {
   children: React.ReactNode
@@ -10,10 +12,18 @@ export function Layout({ children }: Props) {
   const { profile, signOut } = useAuth()
   const location = useLocation()
   const { isDark, toggle } = useDarkMode()
+  const { partnership } = usePartnership()
+  const { currentWeekCheckIn } = useCheckIns(partnership?.id)
+
+  // Dynamic check-in nav item based on whether one exists this week
+  const checkInPath = currentWeekCheckIn 
+    ? `/check-in/${currentWeekCheckIn.id}/edit` 
+    : '/check-in'
+  const checkInLabel = currentWeekCheckIn ? 'Edit Check-In' : 'New Check-In'
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
-    { path: '/check-in', label: 'New Check-In', icon: '✏️' },
+    { path: checkInPath, label: checkInLabel, icon: '✏️' },
     { path: '/history', label: 'History', icon: '📋' },
     { path: '/settings', label: 'Settings', icon: '⚙️' },
   ]

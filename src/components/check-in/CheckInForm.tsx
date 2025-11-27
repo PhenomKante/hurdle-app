@@ -32,10 +32,17 @@ export function CheckInForm() {
   const { id } = useParams()
   const { user } = useAuth()
   const { partnership } = usePartnership()
-  const { checkIns, createCheckIn, updateCheckIn } = useCheckIns(partnership?.id)
+  const { checkIns, currentWeekCheckIn, createCheckIn, updateCheckIn } = useCheckIns(partnership?.id)
   
   const isEditMode = Boolean(id)
   const existingCheckIn = isEditMode ? checkIns.find(c => c.id === id) : null
+
+  // Redirect to edit mode if trying to create new but one already exists this week
+  useEffect(() => {
+    if (!isEditMode && currentWeekCheckIn) {
+      navigate(`/check-in/${currentWeekCheckIn.id}/edit`, { replace: true })
+    }
+  }, [isEditMode, currentWeekCheckIn, navigate])
   
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
