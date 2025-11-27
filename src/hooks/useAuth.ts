@@ -68,11 +68,17 @@ export function useAuthProvider(): AuthContextType {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } }
+      options: { data: { full_name: fullName, role } }
     })
     
     if (!error && data.user) {
-      await supabase.from('profiles').update({ role, full_name: fullName }).eq('id', data.user.id)
+      // Use upsert to handle race condition with database trigger
+      // This ensures the role is saved whether the profile exists or not
+      await supabase.from('profiles').upsert({ 
+        id: data.user.id,
+        role, 
+        full_name: fullName 
+      }, { onConflict: 'id' })
     }
     
     return { error: error as Error | null }
