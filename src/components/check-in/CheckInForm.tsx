@@ -111,6 +111,24 @@ export function CheckInForm() {
     )
   }
 
+  // Only friends can create/edit check-ins
+  const isFriend = user && user.id === partnership.friend_id
+  if (!isFriend) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          Only the friend can create and edit check-ins.
+        </p>
+        <Link
+          to="/"
+          className="text-indigo-600 dark:text-indigo-400 hover:underline"
+        >
+          ← Back to dashboard
+        </Link>
+      </div>
+    )
+  }
+
   // Block editing locked check-ins (older than current week)
   if (isEditMode && existingCheckIn && !isWithinCurrentWeek(existingCheckIn.check_in_date)) {
     return (

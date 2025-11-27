@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import { usePartnership } from '../hooks/usePartnership'
 import { useCheckIns } from '../hooks/useCheckIns'
 import { isWithinCurrentWeek } from '../lib/dateUtils'
 
 export function HistoryPage() {
+  const { user } = useAuth()
   const { partnership } = usePartnership()
   const { checkIns, loading, deleteCheckIn } = useCheckIns(partnership?.id)
+  
+  // Only friends can delete check-ins
+  const isFriend = user && partnership && user.id === partnership.friend_id
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
@@ -89,7 +94,7 @@ export function HistoryPage() {
                     )}
                   </div>
 
-                  {isWithinCurrentWeek(checkIn.check_in_date) ? (
+                  {isFriend && isWithinCurrentWeek(checkIn.check_in_date) ? (
                     confirmDeleteId === checkIn.id ? (
                       <div className="flex gap-2 mt-2">
                         <button
@@ -114,11 +119,11 @@ export function HistoryPage() {
                         Delete
                       </button>
                     )
-                  ) : (
+                  ) : isFriend ? (
                     <span className="mt-2 px-2 py-1 text-gray-400 dark:text-gray-500 text-xs">
                       🔒 Locked
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>

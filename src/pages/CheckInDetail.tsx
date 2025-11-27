@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import { usePartnership } from '../hooks/usePartnership'
 import { useCheckIns } from '../hooks/useCheckIns'
 import { isWithinCurrentWeek } from '../lib/dateUtils'
@@ -6,10 +7,14 @@ import { isWithinCurrentWeek } from '../lib/dateUtils'
 export function CheckInDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { partnership } = usePartnership()
   const { checkIns } = useCheckIns(partnership?.id)
   
   const checkIn = checkIns.find(c => c.id === id)
+  
+  // Only friends can edit check-ins
+  const isFriend = user && partnership && user.id === partnership.friend_id
 
   if (!checkIn) {
     return (
@@ -62,14 +67,14 @@ export function CheckInDetailPage() {
               Victory ✓
             </span>
           )}
-          {isWithinCurrentWeek(checkIn.check_in_date) ? (
+          {isFriend && isWithinCurrentWeek(checkIn.check_in_date) ? (
             <button
               onClick={() => navigate(`/check-in/${checkIn.id}/edit`)}
               className="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition"
             >
               Edit
             </button>
-          ) : (
+          ) : !isFriend ? null : (
             <span className="px-3 py-1.5 text-gray-400 dark:text-gray-500 text-sm">
               🔒 Locked
             </span>

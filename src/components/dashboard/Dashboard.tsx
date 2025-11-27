@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 import { usePartnership } from '../../hooks/usePartnership'
 import { useCheckIns } from '../../hooks/useCheckIns'
 import { TrendChart } from './TrendChart'
@@ -12,8 +13,12 @@ import { RecentCheckIns } from './RecentCheckIns'
 import { UpcomingChallenges } from './UpcomingChallenges'
 
 export function Dashboard() {
+  const { user } = useAuth()
   const { partnership, loading: partnershipLoading } = usePartnership()
   const { checkIns, loading: checkInsLoading } = useCheckIns(partnership?.id)
+  
+  // Only friends can create check-ins
+  const isFriend = user && partnership && user.id === partnership.friend_id
 
   if (partnershipLoading || checkInsLoading) {
     return (
@@ -56,24 +61,26 @@ export function Dashboard() {
             Partnership with {partnership.friend?.full_name || partnership.partner?.full_name}
           </p>
         </div>
-        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-          {checkInsDue && (
-            <Link
-              to="/check-in"
-              className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 animate-pulse flex items-center justify-center gap-2 text-sm sm:text-base transition-all active:scale-95"
-            >
-              <span>📝</span> <span className="whitespace-nowrap">Check-In Due!</span>
-            </Link>
-          )}
-          {!checkInsDue && (
-            <Link
-              to="/check-in"
-              className="flex-1 sm:flex-none px-4 py-2.5 border border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-center text-sm sm:text-base transition-all active:scale-95"
-            >
-              New Check-In
-            </Link>
-          )}
-        </div>
+        {isFriend && (
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+            {checkInsDue && (
+              <Link
+                to="/check-in"
+                className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 animate-pulse flex items-center justify-center gap-2 text-sm sm:text-base transition-all active:scale-95"
+              >
+                <span>📝</span> <span className="whitespace-nowrap">Check-In Due!</span>
+              </Link>
+            )}
+            {!checkInsDue && (
+              <Link
+                to="/check-in"
+                className="flex-1 sm:flex-none px-4 py-2.5 border border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-center text-sm sm:text-base transition-all active:scale-95"
+              >
+                New Check-In
+              </Link>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -118,12 +125,18 @@ export function Dashboard() {
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
             Start your first check-in to see your dashboard come to life with insights and trends.
           </p>
-          <Link
-            to="/check-in"
-            className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all active:scale-95"
-          >
-            Start First Check-In
-          </Link>
+          {isFriend ? (
+            <Link
+              to="/check-in"
+              className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all active:scale-95"
+            >
+              Start First Check-In
+            </Link>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Waiting for your friend to create their first check-in.
+            </p>
+          )}
         </div>
       )}
     </div>
