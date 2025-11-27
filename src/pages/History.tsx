@@ -1,10 +1,21 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePartnership } from '../hooks/usePartnership'
 import { useCheckIns } from '../hooks/useCheckIns'
+import { isWithinCurrentWeek } from '../lib/dateUtils'
 
 export function HistoryPage() {
   const { partnership } = usePartnership()
-  const { checkIns, loading } = useCheckIns(partnership?.id)
+  const { checkIns, loading, deleteCheckIn } = useCheckIns(partnership?.id)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id)
+    await deleteCheckIn(id)
+    setDeletingId(null)
+    setConfirmDeleteId(null)
+  }
 
   if (loading) {
     return (
@@ -31,13 +42,12 @@ export function HistoryPage() {
       ) : (
         <div className="space-y-4">
           {checkIns.map(checkIn => (
-            <Link
+            <div
               key={checkIn.id}
-              to={`/check-in/${checkIn.id}`}
-              className="block bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition border border-transparent dark:border-gray-700"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition border border-transparent dark:border-gray-700"
             >
               <div className="flex justify-between items-start">
-                <div>
+                <Link to={`/check-in/${checkIn.id}`} className="flex-1">
                   <div className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                     {new Date(checkIn.check_in_date).toLocaleDateString('en-US', {
                       weekday: 'long',
@@ -58,27 +68,60 @@ export function HistoryPage() {
                       Goal: {checkIn.weekly_goal}
                     </div>
                   )}
-                </div>
+                </Link>
 
-                <div className="flex flex-col items-end gap-1">
-                  {checkIn.acted_on_urges ? (
-                    <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded">
-                      Struggled
-                    </span>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex flex-col items-end gap-1">
+                    {checkIn.acted_on_urges ? (
+                      <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded">
+                        Struggled
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
+                        Victory ✓
+                      </span>
+                    )}
+                    
+                    {checkIn.urge_level === 'strong' && (
+                      <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded">
+                        Strong urges
+                      </span>
+                    )}
+                  </div>
+
+                  {isWithinCurrentWeek(checkIn.check_in_date) ? (
+                    confirmDeleteId === checkIn.id ? (
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => handleDelete(checkIn.id)}
+                          disabled={deletingId === checkIn.id}
+                          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50"
+                        >
+                          {deletingId === checkIn.id ? 'Deleting...' : 'Confirm'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="px-3 py-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs rounded hover:bg-gray-400 dark:hover:bg-gray-500"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(checkIn.id)}
+                        className="mt-2 px-3 py-1 text-red-600 dark:text-red-400 text-xs hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                      >
+                        Delete
+                      </button>
+                    )
                   ) : (
-                    <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
-                      Victory ✓
-                    </span>
-                  )}
-                  
-                  {checkIn.urge_level === 'strong' && (
-                    <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded">
-                      Strong urges
+                    <span className="mt-2 px-2 py-1 text-gray-400 dark:text-gray-500 text-xs">
+                      🔒 Locked
                     </span>
                   )}
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

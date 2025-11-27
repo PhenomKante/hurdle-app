@@ -1,9 +1,11 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { usePartnership } from '../hooks/usePartnership'
 import { useCheckIns } from '../hooks/useCheckIns'
+import { isWithinCurrentWeek } from '../lib/dateUtils'
 
 export function CheckInDetailPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { partnership } = usePartnership()
   const { checkIns } = useCheckIns(partnership?.id)
   
@@ -50,15 +52,29 @@ export function CheckInDetailPage() {
             })}
           </h1>
         </div>
-        {checkIn.acted_on_urges ? (
-          <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full">
-            Struggled
-          </span>
-        ) : (
-          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">
-            Victory ✓
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {checkIn.acted_on_urges ? (
+            <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full">
+              Struggled
+            </span>
+          ) : (
+            <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">
+              Victory ✓
+            </span>
+          )}
+          {isWithinCurrentWeek(checkIn.check_in_date) ? (
+            <button
+              onClick={() => navigate(`/check-in/${checkIn.id}/edit`)}
+              className="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition"
+            >
+              Edit
+            </button>
+          ) : (
+            <span className="px-3 py-1.5 text-gray-400 dark:text-gray-500 text-sm">
+              🔒 Locked
+            </span>
+          )}
+        </div>
       </div>
 
       <Section title="💜 Heart Check">

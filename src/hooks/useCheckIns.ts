@@ -58,5 +58,18 @@ export function useCheckIns(partnershipId: string | undefined) {
     return { data, error }
   }
 
-  return { checkIns, loading, createCheckIn, updateCheckIn, refetch: fetchCheckIns }
+  async function deleteCheckIn(id: string) {
+    const { error } = await supabase
+      .from('check_ins')
+      .delete()
+      .eq('id', id)
+
+    if (!error) {
+      setCheckIns(prev => prev.filter(c => c.id !== id))
+    }
+
+    return { error }
+  }
+
+  return { checkIns, loading, createCheckIn, updateCheckIn, deleteCheckIn, refetch: fetchCheckIns }
 }

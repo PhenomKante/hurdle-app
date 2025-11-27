@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { usePartnership } from '../../hooks/usePartnership'
 import { useCheckIns } from '../../hooks/useCheckIns'
+import { isWithinCurrentWeek } from '../../lib/dateUtils'
 import { HeartCheck } from './HeartCheck'
 import { BattleSection } from './BattleSection'
 import { TriggersSection } from './TriggersSection'
@@ -12,27 +13,67 @@ import type { CheckInInsert } from '../../types/database'
 
 const STEPS = ['Heart Check', 'The Battle', 'Triggers', 'Wins', 'Next Week']
 
+const DEFAULT_FORM_DATA: Partial<CheckInInsert> = {
+  rating_emotional: 5,
+  rating_spiritual: 5,
+  rating_stress: 5,
+  scripture_reading: false,
+  urge_level: 'none',
+  acted_on_urges: false,
+  halt_hungry: false,
+  halt_angry: false,
+  halt_lonely: false,
+  halt_tired: false,
+  coping_strategies: [],
+}
+
 export function CheckInForm() {
   const navigate = useNavigate()
+  const { id } = useParams()
   const { user } = useAuth()
   const { partnership } = usePartnership()
-  const { createCheckIn } = useCheckIns(partnership?.id)
+  const { checkIns, createCheckIn, updateCheckIn } = useCheckIns(partnership?.id)
+  
+  const isEditMode = Boolean(id)
+  const existingCheckIn = isEditMode ? checkIns.find(c => c.id === id) : null
   
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState<Partial<CheckInInsert>>({
-    rating_emotional: 5,
-    rating_spiritual: 5,
-    rating_stress: 5,
-    scripture_reading: false,
-    urge_level: 'none',
-    acted_on_urges: false,
-    halt_hungry: false,
-    halt_angry: false,
-    halt_lonely: false,
-    halt_tired: false,
-    coping_strategies: [],
-  })
+  const [formData, setFormData] = useState<Partial<CheckInInsert>>(DEFAULT_FORM_DATA)
+
+  useEffect(() => {
+    if (isEditMode && existingCheckIn) {
+      setFormData({
+        rating_emotional: existingCheckIn.rating_emotional,
+        rating_spiritual: existingCheckIn.rating_spiritual,
+        rating_stress: existingCheckIn.rating_stress,
+        weighing_on_mind: existingCheckIn.weighing_on_mind,
+        god_connection: existingCheckIn.god_connection,
+        scripture_reading: existingCheckIn.scripture_reading,
+        scripture_notes: existingCheckIn.scripture_notes,
+        urge_level: existingCheckIn.urge_level,
+        acted_on_urges: existingCheckIn.acted_on_urges,
+        urge_details: existingCheckIn.urge_details,
+        trigger_preceding_events: existingCheckIn.trigger_preceding_events,
+        coping_strategies: existingCheckIn.coping_strategies || [],
+        anything_hiding: existingCheckIn.anything_hiding,
+        stress_points: existingCheckIn.stress_points,
+        halt_hungry: existingCheckIn.halt_hungry,
+        halt_angry: existingCheckIn.halt_angry,
+        halt_lonely: existingCheckIn.halt_lonely,
+        halt_tired: existingCheckIn.halt_tired,
+        close_calls: existingCheckIn.close_calls,
+        what_went_well: existingCheckIn.what_went_well,
+        proud_of: existingCheckIn.proud_of,
+        god_showed_up: existingCheckIn.god_showed_up,
+        what_helped: existingCheckIn.what_helped,
+        upcoming_challenges: existingCheckIn.upcoming_challenges,
+        planned_boundaries: existingCheckIn.planned_boundaries,
+        weekly_goal: existingCheckIn.weekly_goal,
+        support_needed: existingCheckIn.support_needed,
+      })
+    }
+  }, [isEditMode, existingCheckIn])
 
   function updateForm(updates: Partial<CheckInInsert>) {
     setFormData(prev => ({ ...prev, ...updates }))
@@ -42,15 +83,23 @@ export function CheckInForm() {
     if (!partnership || !user) return
     
     setSaving(true)
-    const { error } = await createCheckIn({
-      ...formData,
-      partnership_id: partnership.id,
-      created_by: user.id,
-    } as CheckInInsert)
-
-    if (!error) {
-      navigate('/')
+    
+    if (isEditMode && id) {
+      const { error } = await updateCheckIn(id, formData)
+      if (!error) {
+        navigate(`/check-in/${id}`)
+      }
+    } else {
+      const { error } = await createCheckIn({
+        ...formData,
+        partnership_id: partnership.id,
+        created_by: user.id,
+      } as CheckInInsert)
+      if (!error) {
+        navigate('/')
+      }
     }
+    
     setSaving(false)
   }
 
@@ -58,6 +107,26 @@ export function CheckInForm() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600 dark:text-gray-400">You need to set up a partnership first.</p>
+      </div>
+    )
+  }
+
+  // Block editing locked check-ins (older than current week)
+  if (isEditMode && existingCheckIn && !isWithinCurrentWeek(existingCheckIn.check_in_date)) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          🔒 This check-in is locked and cannot be edited.
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+          Check-ins can only be edited within the same week they were created.
+        </p>
+        <Link
+          to={`/check-in/${id}`}
+          className="text-indigo-600 dark:text-indigo-400 hover:underline"
+        >
+          ← Back to check-in
+        </Link>
       </div>
     )
   }
@@ -117,7 +186,7 @@ export function CheckInForm() {
             disabled={saving}
             className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Complete Check-In ✓'}
+            {saving ? 'Saving...' : isEditMode ? 'Save Changes ✓' : 'Complete Check-In ✓'}
           </button>
         )}
       </div>

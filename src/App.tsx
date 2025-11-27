@@ -68,6 +68,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/check-in/:id/edit"
+        element={
+          <ProtectedRoute>
+            <Layout><CheckInForm /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/history"
         element={
           <ProtectedRoute>
