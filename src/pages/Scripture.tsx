@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { usePartnership } from '../hooks/usePartnership'
 import { useScripture } from '../hooks/useScripture'
 import { ScriptureSelector } from '../components/scripture/ScriptureSelector'
+import { isWithinCurrentWeek } from '../lib/dateUtils'
 import type { ScriptureTheme } from '../types/database'
 
 const themeColors: Record<ScriptureTheme, string> = {
@@ -34,7 +35,7 @@ export function Scripture() {
   } = useScripture(partnership?.id, partnership?.created_at || undefined)
 
   const [showSelector, setShowSelector] = useState(false)
-  const [reflectionNotes, setReflectionNotes] = useState(currentWeekScripture?.progress?.reflection_notes || '')
+  const [reflectionNotes, setReflectionNotes] = useState('')
   const [saving, setSaving] = useState(false)
 
   const isPartner = user && partnership && user.id === partnership.partner_id
@@ -42,9 +43,18 @@ export function Scripture() {
   const scripture = currentWeekScripture?.scripture
   const progress = currentWeekScripture?.progress
   
-  // Friend can only save reflection once (when notes exist, it's locked)
-  const hasReflection = !!progress?.reflection_notes
-  const isReflectionLocked = hasReflection
+  // Update reflectionNotes when progress loads
+  useEffect(() => {
+    if (progress?.reflection_notes) {
+      setReflectionNotes(progress.reflection_notes)
+    }
+  }, [progress?.reflection_notes])
+  
+  // Friend can edit reflection notes during current week only
+  const isCurrentWeek = currentWeekScripture?.week_start_date 
+    ? isWithinCurrentWeek(currentWeekScripture.week_start_date)
+    : false
+  const canEditReflection = isFriend && isCurrentWeek
 
   const handleMarkAsRead = async () => {
     setSaving(true)
@@ -218,13 +228,13 @@ export function Scripture() {
               )}
             </div>
 
-            {/* Reflection Notes - Only Friend can add, once per week */}
+            {/* Reflection Notes - Friend can edit during current week */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Reflection Notes {isFriend && !isReflectionLocked && '(one-time submission)'}
+                Reflection Notes
               </label>
               
-              {isFriend && !isReflectionLocked ? (
+              {canEditReflection ? (
                 <>
                   <textarea
                     value={reflectionNotes}
@@ -239,11 +249,13 @@ export function Scripture() {
                       disabled={saving || !reflectionNotes.trim()}
                       className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm"
                     >
-                      {saving ? 'Saving...' : 'Submit Reflection'}
+                      {saving ? 'Saving...' : progress?.reflection_notes ? 'Update Notes' : 'Save Notes'}
                     </button>
-                    <span className="text-xs text-amber-600 dark:text-amber-400">
-                      ⚠️ Cannot be edited after submission
-                    </span>
+                    {progress?.reflection_notes && (
+                      <span className="text-xs text-green-600 dark:text-green-400">
+                        ✓ Saved
+                      </span>
+                    )}
                   </div>
                 </>
               ) : (
@@ -257,9 +269,9 @@ export function Scripture() {
                       {isFriend ? 'No reflection added yet.' : 'Friend has not added a reflection yet.'}
                     </p>
                   )}
-                  {isFriend && isReflectionLocked && (
+                  {isFriend && !isCurrentWeek && progress?.reflection_notes && (
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-1">
-                      🔒 Reflection submitted for this week
+                      🔒 Week ended - reflection locked
                     </p>
                   )}
                 </div>
