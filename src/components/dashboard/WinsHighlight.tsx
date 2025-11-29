@@ -34,7 +34,7 @@ export function WinsHighlight({ checkIns }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {/* Recent Wins */}
         <div>
-          <h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 sm:mb-3">Recent Victories</h3>
+          <h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 sm:mb-3">Recent Strong Weeks</h3>
           {recentWins.length > 0 ? (
             <div className="space-y-2 sm:space-y-3">
               {recentWins.map(win => (

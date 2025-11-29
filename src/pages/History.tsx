@@ -6,7 +6,7 @@ import { useCheckIns } from '../hooks/useCheckIns'
 import { isWithinCurrentWeek } from '../lib/dateUtils'
 import type { CheckIn } from '../types/database'
 
-type FilterType = 'all' | 'victories' | 'struggles'
+type FilterType = 'all' | 'strongWeeks' | 'toughWeeks'
 type SortType = 'newest' | 'oldest'
 
 export function HistoryPage() {
@@ -33,9 +33,9 @@ export function HistoryPage() {
     let result = [...checkIns]
 
     // Apply filter
-    if (filter === 'victories') {
+    if (filter === 'strongWeeks') {
       result = result.filter(c => !c.acted_on_urges)
-    } else if (filter === 'struggles') {
+    } else if (filter === 'toughWeeks') {
       result = result.filter(c => c.acted_on_urges)
     }
 
@@ -62,12 +62,12 @@ export function HistoryPage() {
 
   // Stats
   const stats = useMemo(() => {
-    const victories = checkIns.filter(c => !c.acted_on_urges).length
+    const strongWeeks = checkIns.filter(c => !c.acted_on_urges).length
     const total = checkIns.length
     const avgEmotional = total > 0 
       ? Math.round(checkIns.reduce((sum, c) => sum + (c.rating_emotional || 0), 0) / total * 10) / 10
       : 0
-    return { victories, total, avgEmotional }
+    return { strongWeeks, total, avgEmotional }
   }, [checkIns])
 
   const getUrgeIcon = (level: string | null) => {
@@ -146,8 +146,8 @@ export function HistoryPage() {
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.victories}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Victories</div>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.strongWeeks}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Strong Weeks</div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{stats.total}</div>
@@ -176,7 +176,7 @@ export function HistoryPage() {
             {/* Filter & Sort */}
             <div className="flex flex-wrap gap-2">
               <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                {(['all', 'victories', 'struggles'] as FilterType[]).map(f => (
+                {(['all', 'strongWeeks', 'toughWeeks'] as FilterType[]).map(f => (
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
@@ -186,7 +186,7 @@ export function HistoryPage() {
                         : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
-                    {f === 'all' ? '📋 All' : f === 'victories' ? '✓ Victories' : '⚡ Struggles'}
+                    {f === 'all' ? '📋 All' : f === 'strongWeeks' ? '✓ Strong Weeks' : '⚡ Tough Weeks'}
                   </button>
                 ))}
               </div>
@@ -305,7 +305,7 @@ export function HistoryPage() {
                               ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
                               : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                           }`}>
-                            {checkIn.acted_on_urges ? '⚡ Struggled' : '✓ Victory'}
+                            {checkIn.acted_on_urges ? '⚡ Tough Week' : '✓ Strong Week'}
                           </span>
                           
                           <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300`}>

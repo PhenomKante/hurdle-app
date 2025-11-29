@@ -67,10 +67,10 @@ export function BattleStatus({ checkIns }: Props) {
           </div>
         </div>
 
-        {/* Victory Stats */}
+        {/* Strong Week Stats */}
         <div className="space-y-3 sm:space-y-4 order-1 sm:order-2">
           <div>
-            <h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Victory Rate</h3>
+            <h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Strong Week Rate</h3>
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3 sm:h-4 overflow-hidden">
                 <div 
@@ -88,11 +88,11 @@ export function BattleStatus({ checkIns }: Props) {
           <div className="grid grid-cols-2 gap-2 sm:gap-4">
             <div className="p-2 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg transition-transform hover:scale-[1.02]">
               <div className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">{cleanCount}</div>
-              <div className="text-[10px] sm:text-xs text-green-700 dark:text-green-300">Victories</div>
+              <div className="text-[10px] sm:text-xs text-green-700 dark:text-green-300">Strong Weeks</div>
             </div>
             <div className="p-2 sm:p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg transition-transform hover:scale-[1.02]">
               <div className="text-lg sm:text-xl font-bold text-orange-600 dark:text-orange-400">{actedCount}</div>
-              <div className="text-[10px] sm:text-xs text-orange-700 dark:text-orange-300">Setbacks</div>
+              <div className="text-[10px] sm:text-xs text-orange-700 dark:text-orange-300">Tough Weeks</div>
             </div>
           </div>
 

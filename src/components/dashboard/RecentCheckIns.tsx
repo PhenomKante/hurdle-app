@@ -39,11 +39,11 @@ export function RecentCheckIns({ checkIns }: Props) {
                     </span>
                     {checkIn.acted_on_urges ? (
                       <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full">
-                        Setback
+                        Tough Week
                       </span>
                     ) : (
                       <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">
-                        Victory
+                        Strong Week
                       </span>
                     )}
                   </div>
