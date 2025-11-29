@@ -7,6 +7,7 @@ import { CheckInForm } from './components/check-in/CheckInForm'
 import { CheckInDetailPage } from './pages/CheckInDetail'
 import { HistoryPage } from './pages/History'
 import { SettingsPage } from './pages/Settings'
+import { Scripture } from './pages/Scripture'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -88,6 +89,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Layout><SettingsPage /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/scripture"
+        element={
+          <ProtectedRoute>
+            <Layout><Scripture /></Layout>
           </ProtectedRoute>
         }
       />

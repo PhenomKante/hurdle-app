@@ -215,3 +215,40 @@ export type Partnership = Database['public']['Tables']['partnerships']['Row']
 export type CheckIn = Database['public']['Tables']['check_ins']['Row']
 export type CheckInInsert = Database['public']['Tables']['check_ins']['Insert']
 export type ReminderSettings = Database['public']['Tables']['reminder_settings']['Row']
+
+// Scripture types
+export type ScriptureTheme = 'identity' | 'freedom' | 'strength' | 'renewal'
+
+export interface Scripture {
+  id: string
+  day_number: number
+  theme: ScriptureTheme
+  title: string
+  reference: string
+  verse_text: string
+  reflection_question: string
+  is_key_verse: boolean
+  created_at: string
+}
+
+export interface WeeklyScripture {
+  id: string
+  partnership_id: string
+  scripture_id: string
+  week_number: number
+  week_start_date: string
+  assigned_by: string
+  assigned_at: string
+  scripture?: Scripture
+}
+
+export interface ScriptureProgress {
+  id: string
+  weekly_scripture_id: string
+  user_id: string
+  is_read: boolean
+  read_at: string | null
+  reflection_notes: string | null
+  created_at: string
+  updated_at: string
+}

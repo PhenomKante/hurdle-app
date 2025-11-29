@@ -3,8 +3,23 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { usePartnership } from '../hooks/usePartnership'
 import { useCheckIns } from '../hooks/useCheckIns'
+import { useScripture, type WeeklyScriptureWithDetails } from '../hooks/useScripture'
 import { isWithinCurrentWeek } from '../lib/dateUtils'
-import type { CheckIn } from '../types/database'
+import type { CheckIn, ScriptureTheme } from '../types/database'
+
+const themeColors: Record<ScriptureTheme, string> = {
+  identity: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+  freedom: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+  strength: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+  renewal: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+}
+
+const themeIcons: Record<ScriptureTheme, string> = {
+  identity: '👤',
+  freedom: '🕊️',
+  strength: '💪',
+  renewal: '🔄'
+}
 
 type FilterType = 'all' | 'strongWeeks' | 'toughWeeks'
 type SortType = 'newest' | 'oldest'
@@ -13,8 +28,10 @@ export function HistoryPage() {
   const { user } = useAuth()
   const { partnership } = usePartnership()
   const { checkIns, loading, deleteCheckIn } = useCheckIns(partnership?.id)
+  const { scriptureHistory, loading: scriptureLoading } = useScripture(partnership?.id, partnership?.created_at || undefined)
   
   const isFriend = user && partnership && user.id === partnership.friend_id
+  const [activeTab, setActiveTab] = useState<'checkins' | 'scriptures'>('checkins')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterType>('all')
@@ -120,14 +137,100 @@ export function HistoryPage() {
     )
   }
 
+  // Scripture history rendering
+  const renderScriptureHistory = () => {
+    if (scriptureLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        </div>
+      )
+    }
+
+    if (scriptureHistory.length === 0) {
+      return (
+        <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+          <div className="text-5xl mb-4">📖</div>
+          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100 mb-2">
+            No scripture history yet
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+            Past weekly scriptures and reflections will appear here.
+          </p>
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-4">
+        {scriptureHistory.map((item: WeeklyScriptureWithDetails) => (
+          <div
+            key={item.id}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700"
+          >
+            <div className="flex">
+              {/* Theme indicator */}
+              <div className={`w-1.5 ${
+                item.scripture.theme === 'identity' ? 'bg-purple-400' :
+                item.scripture.theme === 'freedom' ? 'bg-green-400' :
+                item.scripture.theme === 'strength' ? 'bg-orange-400' :
+                'bg-blue-400'
+              }`} />
+              
+              <div className="flex-1 p-4">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                        Week {item.week_number}
+                      </span>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${themeColors[item.scripture.theme]}`}>
+                        {themeIcons[item.scripture.theme]} {item.scripture.theme}
+                      </span>
+                      {item.progress?.is_read && (
+                        <span className="text-green-600 dark:text-green-400 text-xs">✓ Read</span>
+                      )}
+                    </div>
+                    <h4 className="font-medium text-gray-800 dark:text-gray-100">
+                      {item.scripture.title}
+                    </h4>
+                    <p className="text-sm text-indigo-600 dark:text-indigo-400">
+                      {item.scripture.reference}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                    {new Date(item.week_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+
+                {/* Reflection Notes */}
+                {item.progress?.reflection_notes && (
+                  <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 mt-3">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      💭 Reflection
+                    </p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                      {item.progress.reflection_notes}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Check-In History</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">History</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-            {checkIns.length} check-in{checkIns.length !== 1 ? 's' : ''} recorded
+            Your journey over time
           </p>
         </div>
         {isFriend && (
@@ -141,7 +244,35 @@ export function HistoryPage() {
         )}
       </div>
 
-      {checkIns.length > 0 && (
+      {/* Tab Navigation */}
+      <div className="flex border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setActiveTab('checkins')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'checkins'
+              ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          📋 Check-Ins ({checkIns.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('scriptures')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'scriptures'
+              ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          📖 Scriptures ({scriptureHistory.length})
+        </button>
+      </div>
+
+      {/* Scripture History Tab */}
+      {activeTab === 'scriptures' && renderScriptureHistory()}
+
+      {/* Check-Ins Tab */}
+      {activeTab === 'checkins' && checkIns.length > 0 && (
         <>
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-4">
@@ -386,7 +517,7 @@ export function HistoryPage() {
       )}
 
       {/* Footer hint */}
-      {filteredCheckIns.length > 0 && (
+      {activeTab === 'checkins' && filteredCheckIns.length > 0 && (
         <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-4">
           Click any check-in to view full details
         </p>

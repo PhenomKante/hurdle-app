@@ -24,6 +24,7 @@ export function Layout({ children }: Props) {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: checkInPath, label: checkInLabel, icon: '✏️' },
+    { path: '/scripture', label: 'Scripture', icon: '📖' },
     { path: '/history', label: 'History', icon: '📋' },
     { path: '/settings', label: 'Settings', icon: '⚙️' },
   ]

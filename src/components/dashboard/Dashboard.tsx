@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { usePartnership } from '../../hooks/usePartnership'
 import { useCheckIns } from '../../hooks/useCheckIns'
+import { useScripture } from '../../hooks/useScripture'
 import { TrendChart } from './TrendChart'
 import { StatsCards } from './StatsCards'
 import { BattleStatus } from './BattleStatus'
@@ -11,14 +13,28 @@ import { WinsHighlight } from './WinsHighlight'
 import { WeeklyComparison } from './WeeklyComparison'
 import { RecentCheckIns } from './RecentCheckIns'
 import { UpcomingChallenges } from './UpcomingChallenges'
+import { ScriptureCard } from '../scripture/ScriptureCard'
+import { ScriptureSelector } from '../scripture/ScriptureSelector'
 
 export function Dashboard() {
   const { user } = useAuth()
   const { partnership, loading: partnershipLoading } = usePartnership()
   const { checkIns, loading: checkInsLoading } = useCheckIns(partnership?.id)
+  const { 
+    scriptures, 
+    currentWeekScripture, 
+    loading: scriptureLoading,
+    assigning,
+    weekNumber,
+    isCurrentWeekLocked,
+    assignScripture 
+  } = useScripture(partnership?.id, partnership?.created_at || undefined)
+  
+  const [showScriptureSelector, setShowScriptureSelector] = useState(false)
   
   // Only friends can create check-ins
   const isFriend = user && partnership && user.id === partnership.friend_id
+  const isPartner = user && partnership && user.id === partnership.partner_id
 
   if (partnershipLoading || checkInsLoading) {
     return (
@@ -83,6 +99,17 @@ export function Dashboard() {
         )}
       </div>
 
+      {/* Scripture Card */}
+      <ScriptureCard
+        scripture={currentWeekScripture?.scripture || null}
+        progress={currentWeekScripture?.progress || null}
+        weekNumber={weekNumber}
+        isPartner={!!isPartner}
+        isLocked={isCurrentWeekLocked}
+        onAssignClick={() => setShowScriptureSelector(true)}
+        loading={scriptureLoading}
+      />
+
       {/* Stats Cards */}
       <StatsCards checkIns={checkIns} daysSinceLastCheckIn={daysSinceLastCheckIn} />
 
@@ -138,6 +165,16 @@ export function Dashboard() {
             </p>
           )}
         </div>
+      )}
+
+      {/* Scripture Selector Modal */}
+      {showScriptureSelector && (
+        <ScriptureSelector
+          scriptures={scriptures}
+          onSelect={assignScripture}
+          onClose={() => setShowScriptureSelector(false)}
+          assigning={assigning}
+        />
       )}
     </div>
   )
